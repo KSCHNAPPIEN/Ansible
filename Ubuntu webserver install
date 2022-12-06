@@ -1,0 +1,81 @@
+---
+- name: Install and configure Ubuntu server VM with Apache webserver
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Update package manager
+      apt:
+        update_cache: true
+        
+    - name: Install Ubuntu server
+      apt:
+        name: ubuntu-server
+        state: present
+        
+    - name: Set hostname for VM
+      hostname:
+        name: vm
+        
+    - name: Add new user
+      user:
+        name: ansible
+        password: password
+        groups: sudo
+        shell: /bin/bash
+        
+    - name: Set timezone
+      timezone:
+        name: America/New_York
+        
+    - name: Install and configure firewall
+      ufw:
+        policy: allow
+        port: 22/tcp
+        state: enabled
+        
+    - name: Install and configure SSH
+      openssh-server:
+        password_authentication: no
+        permit_root_login: no
+        
+    - name: Install Apache webserver
+      apt:
+        name: apache2
+        state: present
+        
+    - name: Enable Apache modules
+      apache2_module:
+        name: rewrite
+        state: present
+        
+    - name: Install SSL/TLS package
+      apt:
+        name: ssl-cert
+        state: present
+        
+    - name: Create a self-signed SSL certificate
+      openssl_certificate:
+        path: /etc/ssl/certs/vm.crt
+        privatekey_path: /etc/ssl/private/vm.key
+        days: 365
+        country_name: US
+        state_or_province_name: NY
+        locality_name: New York
+        organization_name: Example, Inc.
+        common_name: vm.example.com
+        
+    - name: Create Apache configuration file
+      template:
+        src: templates/vm.conf.j2
+        dest: /etc/apache2/sites-available/vm.conf
+        mode: 0644
+        
+    - name: Enable new Apache configuration
+      apache2_module:
+        name: vm
+        state: present
+        
+    - name: Restart Apache service
+      service:
+        name: apache2
+        state: restarted
