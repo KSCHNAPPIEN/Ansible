@@ -1,11 +1,29 @@
 ---
-- hosts: all
+- name: Set up Docker environment and create specific containers
+  hosts: all
   become: true
   vars:
     container_count: 4
     default_container_name: docker
     default_container_image: ubuntu
     default_container_command: sleep 1d
+    container_names:
+      - apache_webserver
+      - windows_server_vm
+      - ubuntu_workstation
+      - windows_workstation
+    container_images:
+      - httpd:latest
+      - microsoft/windowsservercore
+      - ubuntu:latest
+      - microsoft/windowsservercore
+    container_commands:
+      - httpd-foreground
+      - powershell
+      - /bin/bash
+      - powershell
+    apache_ports:
+      - "80:80"
 
   tasks:
     - name: Install aptitude
@@ -48,15 +66,17 @@
         name: 'docker'
         version: 'latest'
 
-    - name: Pull default Docker image
+    - name: Pull container images
       community.docker.docker_image:
-        name: "{{ default_container_image }}"
+        name: "{{ item }}"
         source: pull
+      with_items: "{{ container_images }}"
 
-    - name: Create default containers
+    - name: Create containers
       community.docker.docker_container:
-        name: "{{ default_container_name }}{{ item }}"
-        image: "{{ default_container_image }}"
-        command: "{{ default_container_command }}"
+        name: "{{ container_names[item] }}"
+        image: "{{ container_images[item] }}"
+        command: "{{ container_commands[item] }}"
+        ports: "{{ apache_ports if container_names[item] == 'apache_webserver' else '' }}"
         state: present
-      with_sequence: count={{ container_count }}
+      with_sequence: count=4
