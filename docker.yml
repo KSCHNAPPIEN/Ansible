@@ -9,14 +9,10 @@
     default_container_command: sleep 1d
     container_names:
       - apache_webserver
-      - windows_server_vm
       - ubuntu_workstation
-      - windows_workstation
     container_images:
       - httpd:latest
-      - microsoft/windowsservercore
       - ubuntu:latest
-      - microsoft/windowsservercore
     container_commands:
       - httpd-foreground
       - powershell
@@ -84,4 +80,4 @@
         command: "{{ container_commands[item] }} ; python /root/version.py"
         ports: "{{ apache_ports if container_names[item] == 'apache_webserver' else '' }}"
         state: present
-      with_sequence: count 4
+      with_sequence: count 2
