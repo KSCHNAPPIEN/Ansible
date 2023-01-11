@@ -26,11 +26,12 @@
       - "80:80"
 
   tasks:
-    - name: Install aptitude
-      apt:
-        name: aptitude
-        state: latest
-        update_cache: true
+   - name: Install aptitude
+  apt:
+    name: aptitude
+    state: latest
+    update_cache: "{{ ansible_facts['packages']['aptitude'] is not defined }}"
+
 
     - name: Install required system packages
       apt:
