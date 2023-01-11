@@ -42,7 +42,7 @@
           - virtualenv
           - python3-setuptools
         state: latest
-        update_cache: true
+        update_cache: present
 
     - name: Add Docker GPG apt Key
       apt_key:
@@ -58,7 +58,7 @@
       apt:
         name: docker-ce
         state: latest
-        update_cache: true
+        update_cache: present
 
     - name: Install Docker Module for Python
       pip:
