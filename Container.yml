@@ -5,12 +5,12 @@
   tasks:
     - name: Stop and remove existing container
       command: |
-        docker stop docker4
-        docker rm docker4
+        docker stop 798b120d0a15
+        docker rm 798b120d0a15
 
     - name: Pull Nextcloud image
       command: docker pull nextcloud:latest
 
     - name: Run container as Nextcloud server
       command: |
-        docker run -d -p 80:80 -p 443:443 --name docker4 -v /nextcloud/data:/var/www/html/data -v /nextcloud/config:/var/www/html/config -v /nextcloud/apps:/var/www/html/apps nextcloud:latest
+        docker run -d -p 80:80 -p 443:443 --name 798b120d0a15 -v /nextcloud/data:/var/www/html/data -v /nextcloud/config:/var/www/html/config -v /nextcloud/apps:/var/www/html/apps nextcloud:latest
