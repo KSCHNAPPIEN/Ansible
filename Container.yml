@@ -1,39 +1,40 @@
+---
 - name: Build WordPress website with MySQL database
   hosts: all
   become: yes
   tasks:
     - name: Create network for containers
       community.docker.docker_network:
-        name: wordpress
+        name: "wordpress"
         
     - name: Deploy MySQL container
       community.docker.docker_container:
-        name: db
-        image: mysql:5.7
+        name: "db"
+        image: "mysql:5.7"
         networks:
-          - name: wordpress
+          - name: "wordpress"
         volumes:
-          - db:/var/lib/mysql
+          - "db:/var/lib/mysql"
         env:
           MYSQL_DATABASE: "wordpress_db"
           MYSQL_USER: "wordpress_user"
           MYSQL_PASSWORD: "password"
           MYSQL_ROOT_PASSWORD: "password"
-        restart_policy: always
+        restart_policy: "always"
 
     - name: Deploy WordPress container
       community.docker.docker_container:
-        name: wordpress
-        image: wordpress:latest
+        name: "wordpress"
+        image: "wordpress:latest"
         ports:
           - "80:80"
         networks:
-          - name: wordpress
+          - name: "wordpress"
         volumes:
-          - wordpress:/var/www/html
+          - "wordpress:/var/www/html"
         env:
           WORDPRESS_DB_HOST: "db"
           WORDPRESS_DB_USER: "wordpress_user"
           WORDPRESS_DB_PASSWORD: "password"
           WORDPRESS_DB_NAME: "wordpress_db"
-        restart_policy: always
+        restart_policy: "always"
