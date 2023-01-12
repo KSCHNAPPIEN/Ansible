@@ -1,12 +1,27 @@
- hosts: all
+- name: Build WordPress website with MySQL database
+  hosts: all
   become: yes
   tasks:
-
-    - name: Create Network
+    - name: Create network for containers
       community.docker.docker_network:
         name: wordpress
+        
+    - name: Deploy MySQL container
+      community.docker.docker_container:
+        name: db
+        image: mysql:5.7
+        networks:
+          - name: wordpress
+        volumes:
+          - db:/var/lib/mysql
+        env:
+          MYSQL_DATABASE: "wordpress_db"
+          MYSQL_USER: "wordpress_user"
+          MYSQL_PASSWORD: "password"
+          MYSQL_ROOT_PASSWORD: "password"
+        restart_policy: always
 
-    - name: Deploy Wordpress
+    - name: Deploy WordPress container
       community.docker.docker_container:
         name: wordpress
         image: wordpress:latest
@@ -18,22 +33,7 @@
           - wordpress:/var/www/html
         env:
           WORDPRESS_DB_HOST: "db"
-          WORDPRESS_DB_USER: "fonteyn"
-          WORDPRESS_DB_PASSWORD: "fonteynadmin"
-          WORDPRESS_DB_NAME: "fonteynpark"
-        restart_policy: always
-
-    - name: Deploy MYSQL
-      community.docker.docker_container:
-        name: db
-        image: mysql:5.7
-        networks:
-          - name: wordpress
-        volumes:
-          - db:/var/lib/mysql
-        env:
-          MYSQL_DATABASE: "fonteyndb"
-          MYSQL_USER: "fonteynadmin"
-          MYSQL_PASSWORD: "4134sfasb56dgs"
-          MYSQL_RANDOM_ROOT_PASSWORD: '1'
+          WORDPRESS_DB_USER: "wordpress_user"
+          WORDPRESS_DB_PASSWORD: "password"
+          WORDPRESS_DB_NAME: "wordpress_db"
         restart_policy: always
