@@ -1,11 +1,24 @@
----
-- hosts: all
-  become: yes
+- name: Deploy Wordpress and MYSQL
+  hosts: localhost
+  vars:
+    MYSQL_ROOT_PASSWORD: "YourSecureRootPassword"
   tasks:
+
+    - name: Install community.docker module
+      ansible.posix.pip:
+        name: ansible-community/docker_module
 
     - name: Create Network
       community.docker.docker_network:
         name: wordpress
+
+    - name: Create Volumes
+      community.docker.docker_volume:
+        name: wordpress
+
+    - name: Create Volumes
+      community.docker.docker_volume:
+        name: db
 
     - name: Deploy Wordpress
       community.docker.docker_container:
@@ -20,9 +33,8 @@
         env:
           WORDPRESS_DB_HOST: "db"
           WORDPRESS_DB_USER: "fonteyn"
-          WORDPRESS_DB_PASSWORD: "kddwatnsafwats@#!21saf"
+          WORDPRESS_DB_PASSWORD: "dsad2142ad@$@1f"
           WORDPRESS_DB_NAME: "fonteyndb"
-        restart_policy: always
 
     - name: Deploy MYSQL
       community.docker.docker_container:
@@ -32,4 +44,8 @@
           - name: wordpress
         volumes:
           - db:/var/lib/mysql
-        env
+        env:
+          MYSQL_ROOT_PASSWORD: "{{ MYSQL_ROOT_PASSWORD }}"
+          MYSQL_DATABASE: "fonteyndb"
+          MYSQL_USER: "fonteyn"
+          MYSQL_PASSWORD: "dsad2142ad@$@1f"
