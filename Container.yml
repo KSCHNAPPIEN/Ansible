@@ -1,15 +1,16 @@
-- name: Set up Docker container as web server
+---
+- name: Update Docker container to Nextcloud
   hosts: all
   become: true
   tasks:
     - name: Stop and remove existing container
       command: |
-        docker stop docker1
-        docker rm docker1
+        docker stop docker4
+        docker rm docker4
 
-    - name: Pull web server image
-      command: docker pull httpd:latest
+    - name: Pull Nextcloud image
+      command: docker pull nextcloud:latest
 
-    - name: Run container as web server
+    - name: Run container as Nextcloud server
       command: |
-        docker run -d -p 80:80 -p 443:443 --name docker1 -v /etc/ssl:/etc/ssl:ro -v /etc/httpd:/etc/httpd:ro -v /var/www:/var/www httpd:latest httpd-foreground
+        docker run -d -p 80:80 -p 443:443 --name docker4 -v /nextcloud/data:/var/www/html/data -v /nextcloud/config:/var/www/html/config -v /nextcloud/apps:/var/www/html/apps nextcloud:latest
