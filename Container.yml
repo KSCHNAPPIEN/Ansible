@@ -1,16 +1,34 @@
----
-- name: Update Docker container to Nextcloud
-  hosts: all
-  become: true
+- hosts: all
+  become: yes
   tasks:
-    - name: Stop and remove existing container
-      command: |
-        docker stop 798b120d0a15
-        docker rm 798b120d0a15
 
-    - name: Pull Nextcloud image
-      command: docker pull nextcloud:latest
+    - name: Create Network
+      community.docker.docker_network:
+        name: wordpress
 
-    - name: Run container as Nextcloud server
-      command: |
-        docker run -d -p 80:80 -p 443:443 --name 798b120d0a15 -v /nextcloud/data:/var/www/html/data -v /nextcloud/config:/var/www/html/config -v /nextcloud/apps:/var/www/html/apps nextcloud:latest
+    - name: Deploy Wordpress
+      community.docker.docker_container:
+        name: wordpress
+        image: wordpress:latest
+        ports:
+          - "80:80"
+        networks:
+          - name: wordpress
+        volumes:
+          - wordpress:/var/www/html
+        env:
+          WORDPRESS_DB_HOST: "db"
+          WORDPRESS_DB_USER: "fonteyn"
+          WORDPRESS_DB_PASSWORD: "kddwatnsafwats@#!21saf"
+          WORDPRESS_DB_NAME: "fonteyndb"
+        restart_policy: always
+
+    - name: Deploy MYSQL
+      community.docker.docker_container:
+        name: db
+        image: mysql:5.7
+        networks:
+          - name: wordpress
+        volumes:
+          - db:/var/lib/mysql
+        env
