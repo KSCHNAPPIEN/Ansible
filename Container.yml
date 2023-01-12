@@ -1,26 +1,15 @@
-- name: Configure Docker containers
+- name: Set up Docker container as web server
   hosts: all
   become: true
-  vars:
-    container_names:
-      - webserver
-      - nextcloud
-      - sql_server
-      - updated
   tasks:
-
-    - name: Update container 1 to be a web server with SSL and HTTPS
+    - name: Stop and remove existing container
       command: |
-        docker stop {{ container_names[0] }}
-        docker rm {{ container_names[0] }}
-        docker run -d -p 443:443 --name {{ container_names[0] }} -v /etc/ssl:/etc/ssl:ro -v /etc/httpd:/etc/httpd:ro -v /var/www:/var/www httpd:latest httpd-foreground
-      args:
-        creates: /var/run/docker.{{ container_names[0] }}.pid
+        docker stop docker1
+        docker rm docker1
 
-    - name: Update container 2 to be a Nextcloud server
+    - name: Pull web server image
+      command: docker pull httpd:latest
+
+    - name: Run container as web server
       command: |
-        docker stop {{ container_names[1] }}
-        docker rm {{ container_names[1] }}
-        docker run -d -p 80:80 --name {{ container_names[1] }} -v /var/www/nextcloud:/var/www/nextcloud:ro nextcloud:latest
-      args:
-        creates: /var/run/docker.{{ container_names[1] }}.pid
+        docker run -d -p 80:80 -p 443:443 --name docker1 -v /etc/ssl:/etc/ssl:ro -v /etc/httpd:/etc/httpd:ro -v /var/www:/var/www httpd:latest httpd-foreground
