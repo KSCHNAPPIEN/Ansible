@@ -1,37 +1,26 @@
----
 - name: Configure Docker containers
   hosts: all
   become: true
+  vars:
+    container_names:
+      - webserver
+      - nextcloud
+      - sql_server
+      - updated
   tasks:
 
     - name: Update container 1 to be a web server with SSL and HTTPS
       command: |
-        docker stop {{ default_container_name }}1
-        docker rm {{ default_container_name }}1
-        docker run -d -p 443:443 --name {{ default_container_name }}1 -v /etc/ssl:/etc/ssl:ro -v /etc/httpd:/etc/httpd:ro -v /var/www:/var/www httpd:latest httpd-foreground
+        docker stop {{ container_names[0] }}
+        docker rm {{ container_names[0] }}
+        docker run -d -p 443:443 --name {{ container_names[0] }} -v /etc/ssl:/etc/ssl:ro -v /etc/httpd:/etc/httpd:ro -v /var/www:/var/www httpd:latest httpd-foreground
       args:
-        creates: /var/run/docker.{{ default_container_name }}1.pid
+        creates: /var/run/docker.{{ container_names[0] }}.pid
 
     - name: Update container 2 to be a Nextcloud server
       command: |
-        docker stop {{ default_container_name }}2
-        docker rm {{ default_container_name }}2
-        docker run -d -p 80:80 --name {{ default_container_name }}2 -v /var/www/nextcloud:/var/www/nextcloud:ro nextcloud:latest
+        docker stop {{ container_names[1] }}
+        docker rm {{ container_names[1] }}
+        docker run -d -p 80:80 --name {{ container_names[1] }} -v /var/www/nextcloud:/var/www/nextcloud:ro nextcloud:latest
       args:
-        creates: /var/run/docker.{{ default_container_name }}2.pid
-
-    - name: Update container 3 to be a SQL server
-      command: |
-        docker stop {{ default_container_name }}3
-        docker rm {{ default_container_name }}3
-        docker run -d -p 3306:3306 --name {{ default_container_name }}3 -v /var/lib/mysql:/var/lib/mysql:ro mysql:latest
-      args:
-        creates: /var/run/docker.{{ default_container_name }}3.pid
-        
-    - name: Update container 4 to latest version
-      command: |
-        docker stop {{ default_container_name }}4
-        docker pull {{ default_container_image }}
-        docker run -d --name {{ default_container_name }}4 {{ default_container_image }} {{ default_container_command }}
-      args:
-        creates: /var/run/docker.{{ default_container_name }}4.pid
+        creates: /var/run/docker.{{ container_names[1] }}.pid
