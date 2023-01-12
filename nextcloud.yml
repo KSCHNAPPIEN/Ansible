@@ -1,0 +1,36 @@
+- name: Install and configure Nextcloud on Docker
+  hosts: all
+  become: yes
+  vars:
+    nextcloud_image: nextcloud:latest
+    nextcloud_container_name: nextcloud
+    db_host: db
+    db_user: nextcloud
+    db_password: mypassword
+    admin_user: admin
+    admin_password: mypassword
+  tasks:
+  - name: Pull Nextcloud image
+    docker_image:
+      name: "{{ nextcloud_image }}"
+      state: present
+  - name: Start Nextcloud container
+    docker_container:
+      name: "{{ nextcloud_container_name }}"
+      image: "{{ nextcloud_image }}"
+      state: started
+      restart_policy: always
+      env:
+        - MYSQL_HOST={{ db_host }}
+        - MYSQL_USER={{ db_user }}
+        - MYSQL_PASSWORD={{ db_password }}
+        - MYSQL_DATABASE=nextcloud
+        - ADMIN_USER={{ admin_user }}
+        - ADMIN_PASSWORD={{ admin_password }}
+  - name: Wait for Nextcloud to start
+    pause:
+      seconds: 30
+  - name: Configure Nextcloud
+    shell: |
+      docker exec -it {{ nextcloud_container_name }} occ maintenance:install --data-dir /var/www/html --database "mysql" --database-name "nextcloud" --database-user "{{ db_user }}" --database-pass "{{ db_password }}" --database-host "{{ db_host }}" --admin-user "{{ admin_user }}" --admin-pass "{{ admin_password }}"
+      docker exec -it {{ nextcloud_container_name }} occ config:system:set trusted_domains 0 --value={{ ansible_host }}
