@@ -1,0 +1,15 @@
+---
+- name: Install Ubuntu server and GitHub on Docker
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Install Docker
+      apt: name=docker.io state=latest
+    - name: Start Docker service
+      service: name=docker state=started
+    - name: Pull Ubuntu image from Docker Hub
+      command: docker pull ubuntu
+    - name: Run Ubuntu container
+      command: docker run -itd --name my_ubuntu ubuntu
+    - name: Install Git on Ubuntu container
+      command: docker exec my_ubuntu apt-get update && apt-get install git -y
